@@ -133,3 +133,32 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 
 	response.SendResponse(res, w, http.StatusOK)
 }
+
+func (h *Handler) dummyLogin(w http.ResponseWriter, r *http.Request) {
+	userType := r.FormValue("user_type")
+
+	if userType == "" {
+		h.log.Error("login", slog.String("error", "user type is empty"))
+		response.SendResponse("user type is empty", w, http.StatusBadRequest)
+		return
+	}
+
+	// TODO: move to tools
+	if userType != "moderator" && userType != "client" {
+		h.log.Error("login", slog.String("error", "user type is invalid"))
+		response.SendResponse("user type is invalid", w, http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.authService.DummyLogin(r.Context(), userType)
+	if err != nil {
+		h.log.Error("login", slog.String("error", err.Error()))
+		errors.ResponseError(err.Error(), w, http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: refactor to constructor
+	res := response.TokenResponse{Token: token}
+
+	response.SendResponse(res, w, http.StatusOK)
+}

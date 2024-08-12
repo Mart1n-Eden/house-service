@@ -9,7 +9,7 @@ import (
 var roleSet = []map[string]struct{}{ // TODO: do something with it
 	{
 		"moderator": {},
-		"user":      {},
+		"client":    {},
 	},
 	{
 		"moderator": {},
@@ -21,6 +21,7 @@ func (h *Handler) Route(secret string) http.Handler {
 
 	router.HandleFunc("POST /register", h.registration)
 	router.HandleFunc("POST /login", h.login)
+	router.HandleFunc("GET /dummyLogin", h.dummyLogin)
 
 	router.Handle("POST /house/create", middleware.JWTMiddleware(http.HandlerFunc(h.createHouse), secret, roleSet[1]))
 	router.Handle("GET /house/{id}", middleware.JWTMiddleware(http.HandlerFunc(h.getHouse), secret, roleSet[0]))

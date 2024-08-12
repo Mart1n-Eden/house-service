@@ -35,3 +35,8 @@ func (s *Service) Login(ctx context.Context, id string, password string) (string
 
 	return token.CreateJWTToken(userType, s.secret)
 }
+
+// TODO: delete ctx (?)
+func (s *Service) DummyLogin(ctx context.Context, userType string) (string, error) {
+	return token.CreateJWTToken(userType, s.secret)
+}
