@@ -11,6 +11,7 @@ type Config struct {
 	Server `yaml:"server"`
 	DB     `yaml:"db"`
 	Logger `yaml:"logger"`
+	Secret string `yaml:"secret"`
 }
 
 type Server struct {
