@@ -2,6 +2,7 @@ package house
 
 import (
 	"context"
+	"strconv"
 
 	"house-service/internal/model"
 )
@@ -11,13 +12,20 @@ type HouseRepo interface {
 	GetHouse(ctx context.Context, id int) ([]model.Flat, error)
 }
 
-type Service struct {
-	repo HouseRepo
+type Cache interface {
+	PutHouse(id string, house []model.Flat) error
+	GetHouse(id string) ([]model.Flat, bool)
 }
 
-func New(repo HouseRepo) *Service {
+type Service struct {
+	repo  HouseRepo
+	cache Cache
+}
+
+func New(repo HouseRepo, cache Cache) *Service {
 	return &Service{
-		repo: repo,
+		repo:  repo,
+		cache: cache,
 	}
 }
 
@@ -26,7 +34,25 @@ func (s *Service) CreateHouse(ctx context.Context, address string, year int, dev
 	return s.repo.CreateHouse(ctx, address, year, dev)
 }
 
-func (s *Service) GetHouse(ctx context.Context, id int) ([]model.Flat, error) {
+func (s *Service) GetHouse(ctx context.Context, id int) (house []model.Flat, err error) {
 	// TODO: add validation
-	return s.repo.GetHouse(ctx, id)
+	idStr := strconv.Itoa(id)
+
+	house, ok := s.cache.GetHouse(idStr)
+	if ok {
+		// TODO: update cache
+		//s.cache.PutHouse(idStr, house)
+		return house, nil
+	}
+
+	house, err = s.repo.GetHouse(ctx, id)
+	if err != nil {
+		// TODO: handling error
+		return nil, err
+	}
+
+	// TODO: handling error
+	s.cache.PutHouse(idStr, house)
+
+	return house, nil
 }

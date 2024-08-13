@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"house-service/internal/cache"
 	"house-service/internal/config"
 	"house-service/internal/http/handler"
 	"house-service/internal/http/server"
@@ -35,7 +36,8 @@ func main() {
 	}
 
 	repo := repository.New(pg)
-	houseSrvc := house.New(repo)
+	c := cache.New()
+	houseSrvc := house.New(repo, c)
 	flatSrvc := flat.New(repo)
 	authSrvc := auth.New(repo, cfg.Secret)
 	hnd := handler.New(log, houseSrvc, flatSrvc, authSrvc)
