@@ -33,7 +33,6 @@ func (h *Handler) createHouse(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getHouse(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "getHouse")
-
 	id, _ := strings.CutPrefix(r.URL.Path, "/house/")
 
 	idInt, err := strconv.Atoi(id)

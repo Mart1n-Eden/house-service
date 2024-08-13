@@ -37,10 +37,11 @@ func main() {
 
 	repo := repository.New(pg)
 	c := cache.New()
-	houseSrvc := house.New(repo, c)
-	flatSrvc := flat.New(repo)
-	authSrvc := auth.New(repo, cfg.Secret)
-	hnd := handler.New(log, houseSrvc, flatSrvc, authSrvc)
+
+	houseService := house.New(repo, c)
+	flatService := flat.New(repo)
+	authService := auth.New(repo, cfg.Secret)
+	hnd := handler.New(log, houseService, flatService, authService)
 
 	app := server.New(hnd.Route(cfg.Secret), cfg.Server)
 

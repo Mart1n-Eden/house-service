@@ -11,7 +11,6 @@ func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev st
 
 	res := &model.House{}
 
-	// TODO: transaction
 	err := r.db.QueryRowxContext(ctx, query, address, year, dev).
 		Scan(&res.Id, &res.Address, &res.Year, &res.Developer, &res.CreatedAt, &res.UpdateAt)
 	if err != nil {
@@ -30,8 +29,7 @@ func (r *repo) GetHouse(ctx context.Context, id int) ([]model.Flat, error) {
 	}
 	//defer rows.Close() // TODO: error handling
 
-	//var flat []response.FlatResponse
-	flats := make([]model.Flat, 0, 1)
+	var flats []model.Flat
 
 	for rows.Next() {
 		var flat model.Flat
