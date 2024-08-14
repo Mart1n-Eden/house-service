@@ -1,8 +1,6 @@
 package response
 
 import (
-	"encoding/json"
-	"net/http"
 	"time"
 )
 
@@ -15,11 +13,11 @@ type HouseResponse struct {
 	UpdateAt  time.Time `json:"update_at"`
 }
 
-//type FlatResponse struct {
-//	Flats []Flat `json:"flats"`
-//}
-
 type FlatResponse struct {
+	Flats []Flat `json:"flats"`
+}
+
+type Flat struct {
 	Id      int    `json:"id"`
 	HouseId int    `json:"house_id"`
 	Price   int    `json:"price"`
@@ -35,13 +33,8 @@ type TokenResponse struct {
 	Token string `json:"token"`
 }
 
-// TODO: move to handler/tools
-func SendResponse(msg any, w http.ResponseWriter, code int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(msg)
-}
-
-func SendStarus(w http.ResponseWriter, code int) {
-	w.WriteHeader(code)
+type Error struct {
+	Message   string `json:"message"`
+	RequestId string `json:"request_id"`
+	Code      int    `json:"code"`
 }

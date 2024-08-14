@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
-	"house-service/internal/http/model/response"
+	"house-service/internal/http/handler/tools"
 )
 
 const (
@@ -22,13 +22,13 @@ func JWTMiddleware(next http.Handler, secret string, role map[string]struct{}) h
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
 		if header == "" {
-			response.SendStarus(w, http.StatusUnauthorized)
+			tools.SendStarus(w, http.StatusUnauthorized)
 			return
 		}
 
 		headerParts := strings.Split(header, " ")
 		if len(headerParts) != 2 {
-			response.SendStarus(w, http.StatusUnauthorized)
+			tools.SendStarus(w, http.StatusUnauthorized)
 			return
 		}
 
@@ -40,18 +40,18 @@ func JWTMiddleware(next http.Handler, secret string, role map[string]struct{}) h
 		})
 
 		if err != nil || !token.Valid {
-			response.SendStarus(w, http.StatusUnauthorized)
+			tools.SendStarus(w, http.StatusUnauthorized)
 			return
 		}
 
 		audience, err := token.Claims.GetAudience()
 		if err != nil {
-			response.SendStarus(w, http.StatusUnauthorized)
+			tools.SendStarus(w, http.StatusUnauthorized)
 			return
 		}
 
 		if _, ok := role[audience[0]]; !ok {
-			response.SendStarus(w, http.StatusUnauthorized)
+			tools.SendStarus(w, http.StatusUnauthorized)
 			return
 		}
 

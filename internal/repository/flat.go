@@ -5,25 +5,26 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"house-service/internal/model"
+	tools "house-service/pkg/utils/dbErrors"
 )
 
 func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (flat *model.Flat, err error) {
 	err = r.transact(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
 		flat, err = r.insertNewFlat(ctx, houseId, price, rooms)
 		if err != nil {
-			return err
+			return tools.PrepareError(err)
 		}
 
 		err = r.updateLastDateHouse(ctx, houseId)
 		if err != nil {
-			return err
+			return tools.PrepareError(err)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, tools.PrepareError(err)
 	}
 
 	return flat, nil
@@ -37,7 +38,7 @@ func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*model.Fl
 	err := r.db.QueryRowxContext(ctx, query, status, id).
 		Scan(&res.Id, &res.HouseId, &res.Price, &res.Rooms, &res.Status)
 	if err != nil {
-		return nil, err
+		return nil, tools.PrepareError(err)
 	}
 
 	return res, nil
@@ -48,7 +49,7 @@ func (r *repo) updateLastDateHouse(ctx context.Context, id int) error {
 
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
-		return err
+		return tools.PrepareError(err)
 	}
 
 	return nil
@@ -62,7 +63,7 @@ func (r *repo) insertNewFlat(ctx context.Context, houseId int, price int, rooms 
 	err := r.db.QueryRowxContext(ctx, query, houseId, price, rooms).
 		Scan(&res.Id, &res.HouseId, &res.Price, &res.Rooms, &res.Status)
 	if err != nil {
-		return nil, err
+		return nil, tools.PrepareError(err)
 	}
 
 	return res, nil

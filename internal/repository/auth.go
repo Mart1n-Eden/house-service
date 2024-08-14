@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+
+	"house-service/pkg/utils/dbErrors"
 )
 
 func (r *repo) CreateUser(ctx context.Context, email string, password string, userType string) (userId string, err error) {
@@ -9,7 +11,7 @@ func (r *repo) CreateUser(ctx context.Context, email string, password string, us
 
 	err = r.db.QueryRowxContext(ctx, query, email, password, userType).Scan(&userId)
 	if err != nil {
-		return "", err
+		return "", dbErrors.PrepareError(err)
 	}
 
 	return userId, nil
@@ -20,7 +22,7 @@ func (r *repo) Login(ctx context.Context, id string, password string) (userType 
 
 	err = r.db.QueryRowxContext(ctx, query, id, password).Scan(&userType)
 	if err != nil {
-		return "", err
+		return "", dbErrors.PrepareError(err)
 	}
 
 	return userType, nil
