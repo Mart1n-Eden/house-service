@@ -21,6 +21,7 @@ type AuthService interface {
 	CreateUser(ctx context.Context, email string, password string, userType string) (string, error)
 	Login(ctx context.Context, id string, password string) (string, error)
 	DummyLogin(ctx context.Context, userType string) (string, error)
+	ParseToken(header string) (string, error)
 }
 
 type Handler struct {

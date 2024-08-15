@@ -18,3 +18,10 @@ type Flat struct {
 	Rooms   int
 	Status  string
 }
+
+type User struct {
+	Id       int
+	Email    string
+	Password string
+	UserType string
+}

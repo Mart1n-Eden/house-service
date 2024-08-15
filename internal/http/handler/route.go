@@ -2,19 +2,7 @@ package handler
 
 import (
 	"net/http"
-
-	"house-service/internal/http/middleware"
 )
-
-var roleSet = []map[string]struct{}{ // TODO: do something with it
-	{
-		"moderator": {},
-		"client":    {},
-	},
-	{
-		"moderator": {},
-	},
-}
 
 func (h *Handler) Route(secret string) http.Handler {
 	router := http.NewServeMux()
@@ -23,11 +11,11 @@ func (h *Handler) Route(secret string) http.Handler {
 	router.HandleFunc("POST /login", h.login)
 	router.HandleFunc("GET /dummyLogin", h.dummyLogin)
 
-	router.Handle("POST /house/create", middleware.JWTMiddleware(http.HandlerFunc(h.createHouse), secret, roleSet[1]))
-	router.Handle("GET /house/{id}", middleware.JWTMiddleware(http.HandlerFunc(h.getHouse), secret, roleSet[0]))
+	router.Handle("POST /house/create", h.jwtMiddleware(http.HandlerFunc(h.createHouse), []string{"moderator"}))
+	router.Handle("GET /house/{id}", h.jwtMiddleware(http.HandlerFunc(h.getHouse), []string{"client", "moderator"}))
 
-	router.Handle("POST /flat/create", middleware.JWTMiddleware(http.HandlerFunc(h.createFlat), secret, roleSet[0]))
-	router.Handle("POST /flat/update", middleware.JWTMiddleware(http.HandlerFunc(h.updateFlat), secret, roleSet[1]))
+	router.Handle("POST /flat/create", h.jwtMiddleware(http.HandlerFunc(h.createFlat), []string{"client", "moderator"}))
+	router.Handle("POST /flat/update", h.jwtMiddleware(http.HandlerFunc(h.updateFlat), []string{"moderator"}))
 
 	return router
 }

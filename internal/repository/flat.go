@@ -45,7 +45,7 @@ func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*model.Fl
 }
 
 func (r *repo) updateLastDateHouse(ctx context.Context, id int) error {
-	query := `UPDATE house SET update_at = now() WHERE id = $1`
+	query := `UPDATE house SET updated_at = now() WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {

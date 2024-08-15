@@ -16,6 +16,7 @@ import (
 	"house-service/internal/service/auth"
 	"house-service/internal/service/flat"
 	"house-service/internal/service/house"
+	"house-service/internal/token"
 )
 
 const (
@@ -38,9 +39,11 @@ func main() {
 	repo := repository.New(pg)
 	c := cache.New()
 
+	tok := token.New(cfg.Secret)
+
 	houseService := house.New(repo, c)
 	flatService := flat.New(repo)
-	authService := auth.New(repo, cfg.Secret)
+	authService := auth.New(repo, tok)
 	hnd := handler.New(log, houseService, flatService, authService)
 
 	app := server.New(hnd.Route(cfg.Secret), cfg.Server)

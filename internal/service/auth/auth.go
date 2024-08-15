@@ -2,8 +2,6 @@ package auth
 
 import (
 	"context"
-
-	"house-service/internal/token"
 )
 
 type AuthRepo interface {
@@ -11,15 +9,20 @@ type AuthRepo interface {
 	Login(ctx context.Context, id string, password string) (string, error)
 }
 
-type Service struct {
-	repo   AuthRepo
-	secret string
+type JWTToken interface {
+	CreateToken(role string) (string, error)
+	ParseToken(header string) (string, error)
 }
 
-func New(repo AuthRepo, secret string) *Service {
+type Service struct {
+	repo      AuthRepo
+	tokenizer JWTToken
+}
+
+func New(repo AuthRepo, token JWTToken) *Service {
 	return &Service{
-		repo:   repo,
-		secret: secret,
+		repo:      repo,
+		tokenizer: token,
 	}
 }
 
@@ -33,10 +36,14 @@ func (s *Service) Login(ctx context.Context, id string, password string) (string
 		return "", err
 	}
 
-	return token.CreateJWTToken(userType, s.secret)
+	return s.tokenizer.CreateToken(userType)
 }
 
 // TODO: delete ctx (?)
 func (s *Service) DummyLogin(ctx context.Context, userType string) (string, error) {
-	return token.CreateJWTToken(userType, s.secret)
+	return s.tokenizer.CreateToken(userType)
+}
+
+func (s *Service) ParseToken(header string) (string, error) {
+	return s.tokenizer.ParseToken(header)
 }

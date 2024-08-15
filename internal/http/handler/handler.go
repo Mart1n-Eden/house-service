@@ -27,6 +27,7 @@ func (h *Handler) createHouse(w http.ResponseWriter, r *http.Request) {
 		h.log.Error("create house", slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
