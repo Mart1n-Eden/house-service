@@ -21,13 +21,21 @@ func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev st
 }
 
 func (r *repo) GetHouse(ctx context.Context, id int) ([]model.Flat, error) {
-	query := `SELECT * FROM flat WHERE house_id = $1`
+	role := ctx.Value("role").(string)
+
+	var query string
+
+	switch role {
+	case "moderator":
+		query = `SELECT * FROM flat WHERE house_id = $1`
+	case "client":
+		query = `SELECT * FROM flat WHERE house_id = $1 AND status = 'approved'`
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
-	//defer rows.Close() // TODO: error handling
 
 	var flats []model.Flat
 

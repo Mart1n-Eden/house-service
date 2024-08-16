@@ -41,8 +41,8 @@ func main() {
 
 	tok := token.New(cfg.Secret)
 
-	houseService := house.New(repo, c)
-	flatService := flat.New(repo)
+	houseService := house.New(repo)
+	flatService := flat.New(repo, c)
 	authService := auth.New(repo, tok)
 	hnd := handler.New(log, houseService, flatService, authService)
 

@@ -9,12 +9,12 @@ import (
 
 type HouseService interface {
 	CreateHouse(ctx context.Context, address string, year int, dev string) (*model.House, error)
-	GetHouse(ctx context.Context, id int) ([]model.Flat, error)
 }
 
 type FlatService interface {
 	CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*model.Flat, error)
 	UpdateFlat(ctx context.Context, id int, status string) (*model.Flat, error)
+	GetHouse(ctx context.Context, id int) ([]model.Flat, error)
 }
 
 type AuthService interface {

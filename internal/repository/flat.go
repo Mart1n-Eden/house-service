@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 	"house-service/internal/model"
@@ -31,13 +32,27 @@ func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int
 }
 
 func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*model.Flat, error) {
-	query := `UPDATE flat SET status = $1 WHERE id = $2 RETURNING *`
+	query := `SELECT status FROM flat WHERE id = $1`
+
+	var currentStatus string
+	if err := r.db.Get(&currentStatus, query, id); err != nil {
+		return nil, tools.PrepareError(err)
+	}
+
+	if currentStatus == "on_moderation" {
+		return nil, errors.New("flat already on moderation")
+	}
+
+	if status == "on_moderation" && currentStatus != "created" {
+		return nil, errors.New("flat already passed moderation")
+	}
+
+	query = `UPDATE flat SET status = $1 WHERE id = $2 RETURNING *`
 
 	res := &model.Flat{}
 
-	err := r.db.QueryRowxContext(ctx, query, status, id).
-		Scan(&res.Id, &res.HouseId, &res.Price, &res.Rooms, &res.Status)
-	if err != nil {
+	if err := r.db.QueryRowxContext(ctx, query, status, id).
+		Scan(&res.Id, &res.HouseId, &res.Price, &res.Rooms, &res.Status); err != nil {
 		return nil, tools.PrepareError(err)
 	}
 

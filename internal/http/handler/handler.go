@@ -48,7 +48,7 @@ func (h *Handler) getHouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.houseService.GetHouse(r.Context(), idInt)
+	res, err := h.flatService.GetHouse(r.Context(), idInt)
 	if err != nil {
 		h.log.Error("get house", slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
