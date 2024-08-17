@@ -5,11 +5,11 @@ import (
 	"errors"
 
 	"github.com/jmoiron/sqlx"
-	"house-service/internal/model"
+	"house-service/internal/domain"
 	tools "house-service/pkg/utils/dbErrors"
 )
 
-func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (flat *model.Flat, err error) {
+func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (flat *domain.Flat, err error) {
 	err = r.transact(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
 		flat, err = r.insertNewFlat(ctx, houseId, price, rooms)
 		if err != nil {
@@ -31,7 +31,7 @@ func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int
 	return flat, nil
 }
 
-func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*model.Flat, error) {
+func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error) {
 	query := `SELECT status FROM flat WHERE id = $1`
 
 	var currentStatus string
@@ -49,7 +49,7 @@ func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*model.Fl
 
 	query = `UPDATE flat SET status = $1 WHERE id = $2 RETURNING *`
 
-	res := &model.Flat{}
+	res := &domain.Flat{}
 
 	if err := r.db.QueryRowxContext(ctx, query, status, id).
 		Scan(&res.Id, &res.HouseId, &res.Price, &res.Rooms, &res.Status); err != nil {
@@ -70,10 +70,10 @@ func (r *repo) updateLastDateHouse(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *repo) insertNewFlat(ctx context.Context, houseId int, price int, rooms int) (*model.Flat, error) {
+func (r *repo) insertNewFlat(ctx context.Context, houseId int, price uint, rooms uint) (*domain.Flat, error) {
 	query := `INSERT INTO flat (house_id, price, rooms) VALUES ($1, $2, $3) RETURNING *`
 
-	res := &model.Flat{}
+	res := &domain.Flat{}
 
 	err := r.db.QueryRowxContext(ctx, query, houseId, price, rooms).
 		Scan(&res.Id, &res.HouseId, &res.Price, &res.Rooms, &res.Status)

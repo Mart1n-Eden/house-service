@@ -24,6 +24,7 @@ const (
 )
 
 func main() {
+
 	cfg := config.ParseConfig("config/config.yaml")
 
 	log := logger.New(cfg.Logger.Level)
@@ -35,6 +36,8 @@ func main() {
 
 		os.Exit(1)
 	}
+
+	// TODO: create ticker which checks new flats for every houses - async
 
 	repo := repository.New(pg)
 	c := cache.New()

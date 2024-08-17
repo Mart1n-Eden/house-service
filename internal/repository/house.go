@@ -3,16 +3,16 @@ package repository
 import (
 	"context"
 
-	"house-service/internal/model"
+	"house-service/internal/domain"
 )
 
-func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev string) (*model.House, error) {
+func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error) {
 	query := `INSERT INTO house (address, year_built, developer) VALUES ($1, $2, $3) RETURNING *`
 
-	res := &model.House{}
+	res := &domain.House{}
 
 	err := r.db.QueryRowxContext(ctx, query, address, year, dev).
-		Scan(&res.Id, &res.Address, &res.Year, &res.Developer, &res.CreatedAt, &res.UpdateAt)
+		Scan(&res.Id, &res.Address, &res.Year, &res.Developer, &res.CreatedAt, &res.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +20,7 @@ func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev st
 	return res, nil
 }
 
-func (r *repo) GetHouse(ctx context.Context, id int) ([]model.Flat, error) {
+func (r *repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
 	role := ctx.Value("role").(string)
 
 	var query string
@@ -37,10 +37,10 @@ func (r *repo) GetHouse(ctx context.Context, id int) ([]model.Flat, error) {
 		return nil, err
 	}
 
-	var flats []model.Flat
+	var flats []domain.Flat
 
 	for rows.Next() {
-		var flat model.Flat
+		var flat domain.Flat
 		err = rows.Scan(&flat.Id, &flat.HouseId, &flat.Price, &flat.Rooms, &flat.Status)
 		if err != nil {
 			return nil, err

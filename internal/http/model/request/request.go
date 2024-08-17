@@ -1,9 +1,9 @@
 package request
 
 type HouseCreateRequest struct {
-	Address   string `json:"address"`
-	Year      int    `json:"year"`
-	Developer string `json:"developer"`
+	Address   string  `json:"address"`
+	Year      int     `json:"year"`
+	Developer *string `json:"developer"`
 }
 
 type FlatCreateRequest struct {

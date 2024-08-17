@@ -4,17 +4,17 @@ import (
 	"context"
 	"log/slog"
 
-	"house-service/internal/model"
+	"house-service/internal/domain"
 )
 
 type HouseService interface {
-	CreateHouse(ctx context.Context, address string, year int, dev string) (*model.House, error)
+	CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error)
 }
 
 type FlatService interface {
-	CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*model.Flat, error)
-	UpdateFlat(ctx context.Context, id int, status string) (*model.Flat, error)
-	GetHouse(ctx context.Context, id int) ([]model.Flat, error)
+	CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*domain.Flat, error)
+	UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error)
+	GetHouse(ctx context.Context, id int) ([]domain.Flat, error)
 }
 
 type AuthService interface {

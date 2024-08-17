@@ -1,4 +1,4 @@
-package model
+package domain
 
 import "time"
 
@@ -8,7 +8,7 @@ type House struct {
 	Year      int
 	Developer string
 	CreatedAt time.Time
-	UpdateAt  time.Time
+	UpdatedAt time.Time
 }
 
 type Flat struct {

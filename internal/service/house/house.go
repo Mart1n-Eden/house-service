@@ -3,11 +3,11 @@ package house
 import (
 	"context"
 
-	"house-service/internal/model"
+	"house-service/internal/domain"
 )
 
 type HouseRepo interface {
-	CreateHouse(ctx context.Context, address string, year int, dev string) (*model.House, error)
+	CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error)
 }
 
 type Service struct {
@@ -20,7 +20,7 @@ func New(repo HouseRepo) *Service {
 	}
 }
 
-func (s *Service) CreateHouse(ctx context.Context, address string, year int, dev string) (*model.House, error) {
+func (s *Service) CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error) {
 	// TODO: add validation
 	return s.repo.CreateHouse(ctx, address, year, dev)
 }

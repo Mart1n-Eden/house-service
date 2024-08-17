@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS flat (
         price INT NOT NULL,
         rooms INT NOT NULL,
         status VARCHAR(20) DEFAULT 'created',
+--         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (house_id) REFERENCES house (id)
 );
 

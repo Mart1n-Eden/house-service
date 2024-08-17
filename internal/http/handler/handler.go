@@ -12,7 +12,7 @@ import (
 	"house-service/pkg/utils/dbErrors"
 )
 
-func (h *Handler) createHouse(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "createHouse")
 
 	houseReq, err := tools.Decode[request.HouseCreateRequest](r)
@@ -22,7 +22,7 @@ func (h *Handler) createHouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.houseService.CreateHouse(r.Context(), houseReq.Address, houseReq.Year, houseReq.Developer)
+	res, err := h.houseService.CreateHouse(r.Context(), houseReq.Address, houseReq.Year, *houseReq.Developer)
 	if err != nil {
 		h.log.Error("create house", slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
@@ -33,10 +33,10 @@ func (h *Handler) createHouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateHouseResponse(res), http.StatusOK)
 }
 
-func (h *Handler) getHouse(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetHouse(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "getHouse")
 
 	id, _ := strings.CutPrefix(r.URL.Path, "/house/")
@@ -59,10 +59,12 @@ func (h *Handler) getHouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateListFlatsResponse(res), http.StatusOK)
 }
 
-func (h *Handler) createFlat(w http.ResponseWriter, r *http.Request) {
+// TODO: unit tests for CreateFlat and UpdateFlat
+
+func (h *Handler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "createFlat")
 
 	flatReq, err := tools.Decode[request.FlatCreateRequest](r)
@@ -83,10 +85,10 @@ func (h *Handler) createFlat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateFlatResponse(res), http.StatusOK)
 }
 
-func (h *Handler) updateFlat(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateFlat(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "updateFlat")
 
 	flatReq, err := tools.Decode[request.FlatUpdateRequest](r)
@@ -107,10 +109,10 @@ func (h *Handler) updateFlat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateFlatResponse(res), http.StatusOK)
 }
 
-func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "CreateUser")
 
 	regReq, err := tools.Decode[request.RegistrationRequest](r)
@@ -131,12 +133,10 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := response.UserIdResponse{UserId: userId}
-
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateUserIdResponse(userId), http.StatusOK)
 }
 
-func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "login")
 
 	loginReq, err := tools.Decode[request.LoginRequest](r)
@@ -157,12 +157,10 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := response.TokenResponse{Token: token}
-
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateTokenResponse(token), http.StatusOK)
 }
 
-func (h *Handler) dummyLogin(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	userType := r.FormValue("user_type")
 
 	if userType == "" {
@@ -184,8 +182,5 @@ func (h *Handler) dummyLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	// TODO: refactor to constructor
-	res := response.TokenResponse{Token: token}
-
-	tools.SendResponse(w, res, http.StatusOK)
+	tools.SendResponse(w, response.CreateTokenResponse(token), http.StatusOK)
 }

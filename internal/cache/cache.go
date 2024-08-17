@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/patrickmn/go-cache"
-	"house-service/internal/model"
+	"house-service/internal/domain"
 )
 
 const (
@@ -22,7 +22,7 @@ func New() *Cache {
 	}
 }
 
-func (c *Cache) PutHouse(id string, house []model.Flat) error {
+func (c *Cache) PutHouse(id string, house []domain.Flat) error {
 	err := c.pool.Add(id, house, defaultExpiration)
 	if err != nil {
 		// TODO: ?
@@ -32,12 +32,12 @@ func (c *Cache) PutHouse(id string, house []model.Flat) error {
 	return nil
 }
 
-func (c *Cache) GetHouse(id string) ([]model.Flat, bool) {
+func (c *Cache) GetHouse(id string) ([]domain.Flat, bool) {
 	c.pool.DeleteExpired()
 
 	items, ok := c.pool.Get(id)
 
-	house, ok := items.([]model.Flat)
+	house, ok := items.([]domain.Flat)
 	if !ok {
 		return nil, false
 	}

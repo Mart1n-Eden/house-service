@@ -5,18 +5,18 @@ import (
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
-	"house-service/internal/model"
+	"house-service/internal/domain"
 )
 
 type FlatRepo interface {
-	CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*model.Flat, error)
-	UpdateFlat(ctx context.Context, id int, status string) (*model.Flat, error)
-	GetHouse(ctx context.Context, id int) ([]model.Flat, error)
+	CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*domain.Flat, error)
+	UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error)
+	GetHouse(ctx context.Context, id int) ([]domain.Flat, error)
 }
 
 type Cache interface {
-	PutHouse(id string, house []model.Flat) error
-	GetHouse(id string) ([]model.Flat, bool)
+	PutHouse(id string, house []domain.Flat) error
+	GetHouse(id string) ([]domain.Flat, bool)
 	Delete(id string)
 }
 
@@ -36,11 +36,11 @@ func New(repo FlatRepo, cache Cache) *Service {
 	}
 }
 
-func (s *Service) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*model.Flat, error) {
+func (s *Service) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (*domain.Flat, error) {
 	return s.repo.CreateFlat(ctx, houseId, price, rooms)
 }
 
-func (s *Service) UpdateFlat(ctx context.Context, id int, status string) (*model.Flat, error) {
+func (s *Service) UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error) {
 	flat, err := s.repo.UpdateFlat(ctx, id, status)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (s *Service) UpdateFlat(ctx context.Context, id int, status string) (*model
 	return flat, nil
 }
 
-func (s *Service) GetHouse(ctx context.Context, id int) (house []model.Flat, err error) {
+func (s *Service) GetHouse(ctx context.Context, id int) (house []domain.Flat, err error) {
 	if ctx.Value("role") == "moderator" {
 		return s.repo.GetHouse(ctx, id)
 	}
