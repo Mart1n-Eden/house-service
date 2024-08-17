@@ -70,7 +70,7 @@ func (r *repo) updateLastDateHouse(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *repo) insertNewFlat(ctx context.Context, houseId int, price uint, rooms uint) (*domain.Flat, error) {
+func (r *repo) insertNewFlat(ctx context.Context, houseId int, price int, rooms int) (*domain.Flat, error) {
 	query := `INSERT INTO flat (house_id, price, rooms) VALUES ($1, $2, $3) RETURNING *`
 
 	res := &domain.Flat{}

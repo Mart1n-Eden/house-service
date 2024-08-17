@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	"house-service/internal/http/handler/model/request"
+	"house-service/internal/http/handler/model/response"
 	"house-service/internal/http/handler/tools"
-	"house-service/internal/http/model/request"
-	"house-service/internal/http/model/response"
 	"house-service/pkg/utils/dbErrors"
 )
 
@@ -18,7 +18,7 @@ func (h *Handler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 	houseReq, err := tools.Decode[request.HouseCreateRequest](r)
 	if err != nil {
 		h.log.Error("decode request", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
@@ -29,7 +29,7 @@ func (h *Handler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -44,7 +44,7 @@ func (h *Handler) GetHouse(w http.ResponseWriter, r *http.Request) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		h.log.Error("convert id", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (h *Handler) GetHouse(w http.ResponseWriter, r *http.Request) {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (h *Handler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 	flatReq, err := tools.Decode[request.FlatCreateRequest](r)
 	if err != nil {
 		h.log.Error("decode request", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *Handler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -94,7 +94,7 @@ func (h *Handler) UpdateFlat(w http.ResponseWriter, r *http.Request) {
 	flatReq, err := tools.Decode[request.FlatUpdateRequest](r)
 	if err != nil {
 		h.log.Error("decode request", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *Handler) UpdateFlat(w http.ResponseWriter, r *http.Request) {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	regReq, err := tools.Decode[request.RegistrationRequest](r)
 	if err != nil {
 		h.log.Error("decode request", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -142,7 +142,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	loginReq, err := tools.Decode[request.LoginRequest](r)
 	if err != nil {
 		h.log.Error("decode request", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
@@ -153,7 +153,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -165,21 +165,21 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 
 	if userType == "" {
 		h.log.Error("login", slog.String("error", "user type is empty"))
-		http.Error(w, "user type is empty", http.StatusBadRequest)
+		tools.SendClientError(w, "user type is empty", http.StatusBadRequest)
 		return
 	}
 
 	// TODO: move to tools
 	if userType != "moderator" && userType != "client" {
 		h.log.Error("login", slog.String("error", "user type is invalid"))
-		http.Error(w, "user type is invalid", http.StatusBadRequest)
+		tools.SendClientError(w, "user type is invalid", http.StatusBadRequest)
 		return
 	}
 
 	token, err := h.authService.DummyLogin(r.Context(), userType)
 	if err != nil {
 		h.log.Error("login", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 	}
 
 	tools.SendResponse(w, response.CreateTokenResponse(token), http.StatusOK)

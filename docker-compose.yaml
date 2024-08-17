@@ -1,8 +1,15 @@
 version: "3.8"
 
 services:
-  postgres-service:
-    image: postgres:latest
+  app:
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -10,4 +17,4 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./sqripts/init.up.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./scripts/init.up.sql:/docker-entrypoint-initdb.d/init.up.sql

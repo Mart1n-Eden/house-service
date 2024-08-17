@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"house-service/internal/http/model/response"
+	"house-service/internal/http/handler/model/response"
 )
 
 func Decode[T any](r *http.Request) (t T, err error) {
@@ -21,8 +21,18 @@ func SendResponse(w http.ResponseWriter, msg any, code int) {
 	json.NewEncoder(w).Encode(msg)
 }
 
+func SendClientError(w http.ResponseWriter, msg string, code int) {
+	err := response.ErrorClient{
+		Error: msg,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(err)
+}
+
 func SendInternalError(w http.ResponseWriter, msg string, code int) {
-	e := response.Error{
+	e := response.ErrorInternal{
 		Message: msg,
 		// TODO: RequestId
 		Code: code,

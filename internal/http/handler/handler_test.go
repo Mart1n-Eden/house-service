@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"house-service/internal/domain"
 	"house-service/internal/http/handler/mocks"
-	"house-service/internal/http/model/response"
+	"house-service/internal/http/handler/model/response"
 	"house-service/internal/logger"
 	"house-service/pkg/utils/dbErrors"
 )
@@ -56,9 +56,8 @@ func TestCreateFlat(t *testing.T) {
 		ok := json.Unmarshal(w.Body.Bytes(), &received)
 		require.Nil(t, ok, "Failed to unmarshal response body")
 
-		assert.Equal(t, expectedResponse, received)
-
-		assert.EqualValues(t, expectedResponse, received)
+		assert.Equal(t, expectedResponse, received, "Expected %v, got %v", expectedResponse, received)
+		assert.EqualValues(t, expectedResponse, received, "Expected %v, got %v", expectedResponse, received)
 	})
 
 	t.Run("InvalidJSON", func(t *testing.T) {
@@ -74,7 +73,16 @@ func TestCreateFlat(t *testing.T) {
 
 		h.CreateFlat(w, req)
 
+		expected := response.ErrorClient{
+			Error: "invalid json",
+		}
+
+		var received response.ErrorClient
+		ok := json.Unmarshal(w.Body.Bytes(), &received)
+		require.Nil(t, ok, "Failed to unmarshal response body")
+
 		assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusBadRequest, w.Code)
+		assert.Equal(t, expected, received, "Expected %v, got %v", expected, received)
 	})
 
 	t.Run("FlatServiceError", func(t *testing.T) {
@@ -93,27 +101,46 @@ func TestCreateFlat(t *testing.T) {
 
 		h.CreateFlat(w, req)
 
+		expected := response.ErrorInternal{
+			Message: dbErrors.ErrFailedConnection,
+			Code:    http.StatusInternalServerError,
+		}
+
+		var received response.ErrorInternal
+		ok := json.Unmarshal(w.Body.Bytes(), &received)
+		require.Nil(t, ok, "Failed to unmarshal response body")
+
 		assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
+		assert.Equal(t, expected, received, "Expected %v, got %v", expected, received)
 	})
 
-	//t.Run("InvalidFlat", func(t *testing.T) {
-	//	flatService := &mocks.FlatService{}
-	//	flatService.On("CreateFlat", context.Background(), 1, 1000, 3).
-	//		Return(nil, dbErrors.ErrAlreadyExists)
-	//
-	//	h := &Handler{
-	//		flatService: flatService,
-	//		log:         log,
-	//	}
-	//
-	//	body := []byte(`{"house_id":1,"price":1000,"rooms":3}`)
-	//	req := httptest.NewRequest("POST", "/flat", bytes.NewReader(body))
-	//	w := httptest.NewRecorder()
-	//
-	//	h.CreateFlat(w, req)
-	//
-	//	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusBadRequest, w.Code)
-	//})
+	t.Run("InvalidFlat", func(t *testing.T) {
+		flatService := &mocks.FlatService{}
+		flatService.On("CreateFlat", context.Background(), 1, 1000, 3).
+			Return(nil, errors.New(dbErrors.ErrAlreadyExists))
+
+		h := &Handler{
+			flatService: flatService,
+			log:         log,
+		}
+
+		body := []byte(`{"house_id":1,"price":1000,"rooms":3}`)
+		req := httptest.NewRequest("POST", "/flat", bytes.NewReader(body))
+		w := httptest.NewRecorder()
+
+		h.CreateFlat(w, req)
+
+		expected := response.ErrorClient{
+			Error: dbErrors.ErrAlreadyExists,
+		}
+
+		var received response.ErrorClient
+		ok := json.Unmarshal(w.Body.Bytes(), &received)
+		require.Nil(t, ok, "Failed to unmarshal response body")
+
+		assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusBadRequest, w.Code)
+		assert.Equal(t, expected, received, "Expected %v, got %v", expected, received)
+	})
 }
 
 func TestGetHouse(t *testing.T) {
@@ -160,6 +187,7 @@ func TestGetHouse(t *testing.T) {
 		ok := json.Unmarshal(w.Body.Bytes(), &received)
 		require.Nil(t, ok, "Failed to unmarshal response body")
 
+		assert.Equal(t, http.StatusOK, w.Code, "Expected status code %d, got %d", http.StatusOK, w.Code)
 		assert.Equal(t, expectedResponse, received)
 	})
 
@@ -178,10 +206,16 @@ func TestGetHouse(t *testing.T) {
 
 		h.GetHouse(w, req)
 
-		assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusNotFound, w.Code)
+		expectedError := response.ErrorClient{
+			Error: dbErrors.ErrNotFound,
+		}
 
-		expectedError := "entity not found"
-		assert.Equal(t, expectedError, strings.TrimSpace(w.Body.String())) // TODO: ???
+		var received response.ErrorClient
+		ok := json.Unmarshal(w.Body.Bytes(), &received)
+		require.Nil(t, ok, "Failed to unmarshal response body")
+
+		assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusNotFound, w.Code)
+		assert.Equal(t, expectedError, received, "Expected error %v, got %v", expectedError, received)
 	})
 
 	t.Run("ErrorGettingHouse", func(t *testing.T) {
@@ -201,16 +235,16 @@ func TestGetHouse(t *testing.T) {
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 
-		expectedError := response.Error{
+		expectedError := response.ErrorInternal{
 			Message: "failed connection",
-			//RequestId: "1",
-			Code: 500,
+			Code:    500,
 		}
 
-		var received response.Error
+		var received response.ErrorInternal
 		ok := json.Unmarshal(w.Body.Bytes(), &received)
 		require.Nil(t, ok, "Failed to unmarshal response body")
 
+		assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 		assert.Equal(t, expectedError, received, "Expected error %v, got %v", expectedError, received)
 	})
 }

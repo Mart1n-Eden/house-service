@@ -11,3 +11,4 @@ db:
   username: "postgres"
   name: "service"
   password: "postgres"
+secret: "secret_key"

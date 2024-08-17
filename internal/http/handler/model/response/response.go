@@ -35,10 +35,14 @@ type TokenResponse struct {
 	Token string `json:"token"`
 }
 
-type Error struct {
-	Message   string `json:"message"`
-	RequestId string `json:"request_id"`
-	Code      int    `json:"code"`
+type ErrorClient struct {
+	Error string `json:"message"`
+}
+
+type ErrorInternal struct {
+	Message string `json:"message"`
+	//RequestId string `json:"request_id"`
+	Code int `json:"code"`
 }
 
 func CreateFlatResponse(f *domain.Flat) Flat {
