@@ -115,3 +115,102 @@ func TestCreateFlat(t *testing.T) {
 	//	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusBadRequest, w.Code)
 	//})
 }
+
+func TestGetHouse(t *testing.T) {
+	log := logger.New("prod")
+
+	t.Run("ValidRequest", func(t *testing.T) {
+		flatService := &mocks.FlatService{}
+		flatService.On("GetHouse", context.Background(), 1).
+			Return([]domain.Flat{
+				{
+					Id:      1,
+					HouseId: 123,
+					Price:   100000,
+					Rooms:   3,
+					Status:  "approved",
+				},
+			}, nil)
+
+		h := &Handler{
+			flatService: flatService,
+			log:         log,
+		}
+
+		req := httptest.NewRequest("GET", "/house/1", nil)
+		w := httptest.NewRecorder()
+
+		h.GetHouse(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, "Expected status code %d, got %d", http.StatusOK, w.Code)
+
+		expectedResponse := response.ListFlatsResponse{
+			Flats: []response.Flat{
+				{
+					Id:      1,
+					HouseId: 123,
+					Price:   100000,
+					Rooms:   3,
+					Status:  "approved",
+				},
+			},
+		}
+
+		var received response.ListFlatsResponse
+		ok := json.Unmarshal(w.Body.Bytes(), &received)
+		require.Nil(t, ok, "Failed to unmarshal response body")
+
+		assert.Equal(t, expectedResponse, received)
+	})
+
+	t.Run("HouseNotFound", func(t *testing.T) {
+		flatService := &mocks.FlatService{}
+		flatService.On("GetHouse", context.Background(), 1).
+			Return(nil, errors.New(dbErrors.ErrNotFound))
+
+		h := &Handler{
+			flatService: flatService,
+			log:         log,
+		}
+
+		req := httptest.NewRequest("GET", "/house/1", nil)
+		w := httptest.NewRecorder()
+
+		h.GetHouse(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code %d, got %d", http.StatusNotFound, w.Code)
+
+		expectedError := "entity not found"
+		assert.Equal(t, expectedError, strings.TrimSpace(w.Body.String())) // TODO: ???
+	})
+
+	t.Run("ErrorGettingHouse", func(t *testing.T) {
+		flatService := &mocks.FlatService{}
+		flatService.On("GetHouse", context.Background(), 1).
+			Return(nil, errors.New(dbErrors.ErrFailedConnection))
+
+		h := &Handler{
+			flatService: flatService,
+			log:         log,
+		}
+
+		req := httptest.NewRequest("GET", "/house/1", nil)
+		w := httptest.NewRecorder()
+
+		h.GetHouse(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
+
+		expectedError := response.Error{
+			Message: "failed connection",
+			//RequestId: "1",
+			Code: 500,
+		}
+
+		var received response.Error
+		ok := json.Unmarshal(w.Body.Bytes(), &received)
+		require.Nil(t, ok, "Failed to unmarshal response body")
+
+		assert.Equal(t, expectedError, received, "Expected error %v, got %v", expectedError, received)
+	})
+}
