@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS house (
 );
 
 CREATE TABLE IF NOT EXISTS flat (
-        id SERIAL PRIMARY KEY,
+        id BIGSERIAL PRIMARY KEY,
         house_id INT NOT NULL,
         price INT NOT NULL,
         rooms INT NOT NULL,
@@ -23,5 +23,13 @@ CREATE TABLE IF NOT EXISTS flat (
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_by UUID DEFAULT NULL,
+        FOREIGN KEY (house_id) REFERENCES house (id)
+);
+
+CREATE TABLE IF NOT EXISTS subscription (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        house_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (house_id) REFERENCES house (id)
 );

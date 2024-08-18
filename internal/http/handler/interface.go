@@ -24,18 +24,24 @@ type AuthService interface {
 	ParseToken(header string) (string, string, error)
 }
 
-type Handler struct {
-	log          *slog.Logger
-	houseService HouseService
-	flatService  FlatService
-	authService  AuthService
+type SubscribeService interface {
+	NewSubscription(ctx context.Context, email string, houseId int) error
 }
 
-func New(log *slog.Logger, house HouseService, flat FlatService, auth AuthService) *Handler {
+type Handler struct {
+	log              *slog.Logger
+	houseService     HouseService
+	flatService      FlatService
+	authService      AuthService
+	subscribeService SubscribeService
+}
+
+func New(log *slog.Logger, house HouseService, flat FlatService, auth AuthService, subscribe SubscribeService) *Handler {
 	return &Handler{
-		log:          log,
-		houseService: house,
-		flatService:  flat,
-		authService:  auth,
+		log:              log,
+		houseService:     house,
+		flatService:      flat,
+		authService:      auth,
+		subscribeService: subscribe,
 	}
 }

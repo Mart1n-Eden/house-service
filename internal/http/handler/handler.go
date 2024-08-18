@@ -182,3 +182,36 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 
 	tools.SendResponse(w, response.CreateTokenResponse(token), http.StatusOK)
 }
+
+func (h *Handler) NewSubscription(w http.ResponseWriter, r *http.Request) {
+	//h.log = h.log.With("method", "newSubscription")
+	id, _ := strings.CutPrefix(r.URL.Path, "/house/")
+	id, _ = strings.CutSuffix(id, "/subscribe")
+
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		h.log.Error("convert id", slog.String("error", err.Error()))
+		tools.SendClientError(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	subReq, err := tools.Decode[request.SubscriptionRequest](r)
+	if err != nil {
+		h.log.Error("decode request", slog.String("error", err.Error()))
+		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+
+	err = h.subscribeService.NewSubscription(r.Context(), subReq.Email, idInt)
+	if err != nil {
+		h.log.Error("create subscription", slog.String("error", err.Error()))
+		if err.Error() == dbErrors.ErrFailedConnection {
+			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tools.SendResponse(w, "Subscribe successfully", http.StatusOK)
+}

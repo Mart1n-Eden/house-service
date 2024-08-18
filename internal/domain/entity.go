@@ -25,3 +25,8 @@ type User struct {
 	Password string
 	UserType string
 }
+
+type Message struct {
+	Recipient string
+	Message   string
+}

@@ -13,9 +13,11 @@ import (
 	"house-service/internal/http/server"
 	"house-service/internal/logger"
 	"house-service/internal/repository"
+	"house-service/internal/sender"
 	"house-service/internal/service/auth"
 	"house-service/internal/service/flat"
 	"house-service/internal/service/house"
+	"house-service/internal/service/subscribe"
 	"house-service/internal/token"
 )
 
@@ -29,7 +31,6 @@ func main() {
 
 	log := logger.New(cfg.Logger.Level)
 
-	// TODO: change context
 	pg, err := repository.NewConnection(context.Background(), cfg.DB)
 	if err != nil {
 		log.Error("error connecting to database", slog.String("error", err.Error()))
@@ -37,19 +38,30 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: create ticker which checks new flats for every houses - async
-
 	repo := repository.New(pg)
 	c := cache.New()
-	
+
 	tok := token.New(cfg.Secret)
+
+	send := sender.New()
 
 	houseService := house.New(repo)
 	flatService := flat.New(repo, c)
 	authService := auth.New(repo, tok)
-	hnd := handler.New(log, houseService, flatService, authService)
+	subService := subscribe.New(repo, send)
 
-	app := server.New(hnd.Route(cfg.Secret), cfg.Server)
+	go func() {
+		ticker := time.NewTicker(12 * time.Hour)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			go subService.GetHouseBySubscription(context.Background())
+		}
+	}()
+
+	hnd := handler.New(log, houseService, flatService, authService, subService)
+
+	app := server.New(hnd.Route(), cfg.Server)
 
 	go func() {
 		if err := app.Run(); err != nil {
