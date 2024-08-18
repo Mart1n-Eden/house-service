@@ -27,9 +27,9 @@ func (r *Repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
 
 	switch role {
 	case "moderator":
-		query = `SELECT * FROM flat WHERE house_id = $1`
+		query = `SELECT id, house_id, price, rooms, status FROM flat WHERE house_id = $1`
 	case "client":
-		query = `SELECT * FROM flat WHERE house_id = $1 AND status = 'approved'`
+		query = `SELECT id, house_id, price, rooms, status FROM flat WHERE house_id = $1 AND status = 'approved'`
 	}
 
 	rows, err := r.db.QueryContext(ctx, query, id)

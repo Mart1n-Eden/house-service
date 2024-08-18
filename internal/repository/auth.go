@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"house-service/internal/domain"
 	"house-service/pkg/utils/dbErrors"
 )
 
@@ -17,15 +18,14 @@ func (r *Repo) CreateUser(ctx context.Context, email string, password string, us
 	return userId, nil
 }
 
-func (r *Repo) Login(ctx context.Context, id string, password string) (userType string, err error) {
-	query := `SELECT user_type FROM users WHERE id = $1 AND password = $2`
+func (r *Repo) Login(ctx context.Context, id string, password string) (domain.User, error) {
+	query := `SELECT id, user_type FROM users WHERE id = $1 AND password = $2`
 
-	err = r.db.QueryRowxContext(ctx, query, id, password).Scan(&userType)
+	var userType domain.User
+	err := r.db.QueryRowxContext(ctx, query, id, password).Scan(&userType.Id, &userType.UserType)
 	if err != nil {
-		return "", dbErrors.PrepareError(err)
+		return domain.User{}, dbErrors.PrepareError(err)
 	}
 
 	return userType, nil
 }
-
-// func Transact(ctx context.Context, tx *sqlx.Tx, f func(tx *sqlx.Tx) error)

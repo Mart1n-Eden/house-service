@@ -41,7 +41,7 @@ func main() {
 
 	repo := repository.New(pg)
 	c := cache.New()
-	g
+	
 	tok := token.New(cfg.Secret)
 
 	houseService := house.New(repo)

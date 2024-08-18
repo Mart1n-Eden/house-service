@@ -62,8 +62,6 @@ func (h *Handler) GetHouse(w http.ResponseWriter, r *http.Request) {
 	tools.SendResponse(w, response.CreateListFlatsResponse(res), http.StatusOK)
 }
 
-// TODO: unit tests for CreateFlat and UpdateFlat
-
 func (h *Handler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 	//h.log = h.log.With("method", "createFlat")
 
@@ -176,7 +174,7 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.authService.DummyLogin(r.Context(), userType)
+	token, err := h.authService.DummyLogin(userType)
 	if err != nil {
 		h.log.Error("login", slog.String("error", err.Error()))
 		tools.SendClientError(w, err.Error(), http.StatusBadRequest)

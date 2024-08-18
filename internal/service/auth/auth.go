@@ -2,16 +2,19 @@ package auth
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+	"house-service/internal/domain"
 )
 
 type AuthRepo interface {
 	CreateUser(ctx context.Context, email string, password string, userType string) (string, error)
-	Login(ctx context.Context, id string, password string) (string, error)
+	Login(ctx context.Context, id string, password string) (domain.User, error)
 }
 
 type JWTToken interface {
-	CreateToken(role string) (string, error)
-	ParseToken(header string) (string, error)
+	CreateToken(user domain.User) (string, error)
+	ParseToken(header string) (string, string, error)
 }
 
 type Service struct {
@@ -31,19 +34,25 @@ func (s *Service) CreateUser(ctx context.Context, email string, password string,
 }
 
 func (s *Service) Login(ctx context.Context, id string, password string) (string, error) {
-	userType, err := s.repo.Login(ctx, id, password)
+	user, err := s.repo.Login(ctx, id, password)
 	if err != nil {
 		return "", err
 	}
 
-	return s.tokenizer.CreateToken(userType)
+	return s.tokenizer.CreateToken(user)
 }
 
-// TODO: delete ctx (?)
-func (s *Service) DummyLogin(ctx context.Context, userType string) (string, error) {
-	return s.tokenizer.CreateToken(userType)
+func (s *Service) DummyLogin(userType string) (string, error) {
+	userID := uuid.New().String()
+
+	user := domain.User{
+		Id:       userID,
+		UserType: userType,
+	}
+
+	return s.tokenizer.CreateToken(user)
 }
 
-func (s *Service) ParseToken(header string) (string, error) {
+func (s *Service) ParseToken(header string) (string, string, error) {
 	return s.tokenizer.ParseToken(header)
 }

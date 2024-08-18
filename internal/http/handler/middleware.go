@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"net/http"
+
+	"house-service/internal/http/handler/tools"
 )
 
 const (
@@ -13,29 +15,30 @@ func (h *Handler) jwtMiddleware(next http.Handler, role []string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get(authHeader)
 		if header == "" {
-			http.Error(w, "no auth header", http.StatusUnauthorized)
+			tools.SendClientError(w, "no auth header", http.StatusUnauthorized)
 			return
 		}
 
-		audience, err := h.authService.ParseToken(header)
+		id, userRole, err := h.authService.ParseToken(header)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			tools.SendClientError(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		var ok bool
 		for i := range role {
-			if role[i] == audience {
+			if role[i] == userRole {
 				ok = true
 			}
 		}
 
 		if !ok {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			tools.SendClientError(w, "invalid role", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "role", audience[0])
+		ctx := context.WithValue(r.Context(), "role", userRole)
+		ctx = context.WithValue(ctx, "id", id)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
