@@ -2,10 +2,12 @@ package flat
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"house-service/internal/domain"
+	"house-service/pkg/utils/dbErrors"
 )
 
 type FlatRepo interface {
@@ -43,10 +45,15 @@ func (s *Service) CreateFlat(ctx context.Context, houseId int, price int, rooms 
 func (s *Service) UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error) {
 	flat, err := s.repo.UpdateFlat(ctx, id, status)
 	if err != nil {
+		if err.Error() == dbErrors.ErrNotFound {
+			return nil, errors.New("flat not found")
+		}
 		return nil, err
 	}
 
-	s.cache.Delete(strconv.Itoa(id))
+	if flat.Status == "approved" {
+		s.cache.Delete(strconv.Itoa(id))
+	}
 
 	return flat, nil
 }

@@ -2,9 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"house-service/internal/domain"
+	"house-service/pkg/utils/dbErrors"
 )
 
 type AuthRepo interface {
@@ -30,12 +32,23 @@ func New(repo AuthRepo, token JWTToken) *Service {
 }
 
 func (s *Service) CreateUser(ctx context.Context, email string, password string, userType string) (string, error) {
-	return s.repo.CreateUser(ctx, email, password, userType)
+	id, err := s.repo.CreateUser(ctx, email, password, userType)
+	if err != nil {
+		if err.Error() != dbErrors.ErrFailedConnection {
+			return "", errors.New("user already exists")
+		}
+		return "", err
+	}
+
+	return id, nil
 }
 
 func (s *Service) Login(ctx context.Context, id string, password string) (string, error) {
 	user, err := s.repo.Login(ctx, id, password)
 	if err != nil {
+		if err.Error() != dbErrors.ErrFailedConnection {
+			return "", errors.New("user not found")
+		}
 		return "", err
 	}
 

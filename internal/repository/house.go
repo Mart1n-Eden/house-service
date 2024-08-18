@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"house-service/internal/domain"
+	tools "house-service/pkg/utils/dbErrors"
 )
 
 func (r *Repo) CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error) {
@@ -14,7 +15,7 @@ func (r *Repo) CreateHouse(ctx context.Context, address string, year int, dev st
 	err := r.db.QueryRowxContext(ctx, query, address, year, dev).
 		Scan(&res.Id, &res.Address, &res.Year, &res.Developer, &res.CreatedAt, &res.UpdatedAt)
 	if err != nil {
-		return nil, err
+		return nil, tools.PrepareError(err)
 	}
 
 	return res, nil
@@ -34,7 +35,7 @@ func (r *Repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
 
 	rows, err := r.db.QueryContext(ctx, query, id)
 	if err != nil {
-		return nil, err
+		return nil, tools.PrepareError(err)
 	}
 
 	var flats []domain.Flat
@@ -43,13 +44,13 @@ func (r *Repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
 		var flat domain.Flat
 		err = rows.Scan(&flat.Id, &flat.HouseId, &flat.Price, &flat.Rooms, &flat.Status)
 		if err != nil {
-			return nil, err
+			return nil, tools.PrepareError(err)
 		}
 		flats = append(flats, flat)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, tools.PrepareError(err)
 	}
 
 	return flats, nil

@@ -254,11 +254,11 @@ func setupGetHouseDBMock(tb testing.TB, id int, role string, flats []domain.Flat
 
 		switch role {
 		case "moderator":
-			mock.ExpectQuery("SELECT * FROM flat WHERE house_id = $1").
+			mock.ExpectQuery("SELECT id, house_id, price, rooms, status FROM flat WHERE house_id = $1").
 				WithArgs(id).
 				WillReturnRows(allRows)
 		case "client":
-			mock.ExpectQuery("SELECT * FROM flat WHERE house_id = $1 AND status = 'approved'").
+			mock.ExpectQuery("SELECT id, house_id, price, rooms, status FROM flat WHERE house_id = $1 AND status = 'approved'").
 				WithArgs(id).
 				WillReturnRows(approvedRows)
 		}
@@ -288,7 +288,7 @@ func setupCreateFlatDBMock(tb testing.TB, flat domain.Flat) testhelper.SetupDBMo
 		)
 
 		mock.ExpectBegin()
-		mock.ExpectQuery("INSERT INTO flat (house_id, price, rooms) VALUES ($1, $2, $3) RETURNING *").
+		mock.ExpectQuery("INSERT INTO flat (house_id, price, rooms) VALUES ($1, $2, $3) RETURNING id, house_id, price, rooms, status").
 			WithArgs(flat.HouseId, flat.Price, flat.Rooms).
 			WillReturnRows(rows)
 		mock.ExpectExec("UPDATE house SET updated_at = now() WHERE id = $1").

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"house-service/internal/domain"
@@ -38,7 +37,6 @@ func (r *Repo) UpdateFlat(ctx context.Context, id int, status string) (*domain.F
 	var currentStatus string
 	var updatedBy *string
 	if err := r.db.QueryRowxContext(ctx, query, id).Scan(&currentStatus, &updatedBy); err != nil {
-		fmt.Println(err.Error())
 		return nil, tools.PrepareError(err)
 	}
 

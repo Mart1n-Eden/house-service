@@ -9,6 +9,7 @@ import (
 
 const (
 	ErrNotFound         = "entity not found"
+	ErrUniqAlreadyExist = "uniq already exists"
 	ErrAlreadyExists    = "entity already exists"
 	ErrFailedConnection = "failed connection"
 )
@@ -27,11 +28,11 @@ func PrepareError(err error) error {
 	switch pErr.Code {
 	case "23503":
 		return errors.New(ErrAlreadyExists)
+	case "23505":
+		return errors.New(ErrUniqAlreadyExist)
 	case "08006":
 		return errors.New(ErrFailedConnection)
 	}
-
-	// TODO: add other dbErrors
 
 	return err
 }
