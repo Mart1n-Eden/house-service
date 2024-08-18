@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"house-service/internal/domain"
 	"house-service/internal/http/handler/mocks"
 	"house-service/internal/http/handler/model/response"
@@ -30,6 +31,7 @@ func TestCreateFlat(t *testing.T) {
 				HouseId: 1,
 				Price:   1000,
 				Rooms:   3,
+				Status:  "created",
 			}, nil)
 
 		h := &Handler{
@@ -50,6 +52,7 @@ func TestCreateFlat(t *testing.T) {
 			HouseId: 1,
 			Price:   1000,
 			Rooms:   3,
+			Status:  "created",
 		}
 
 		var received response.Flat

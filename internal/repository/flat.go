@@ -9,7 +9,7 @@ import (
 	tools "house-service/pkg/utils/dbErrors"
 )
 
-func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (flat *domain.Flat, err error) {
+func (r *Repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int) (flat *domain.Flat, err error) {
 	err = r.transact(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
 		flat, err = r.insertNewFlat(ctx, houseId, price, rooms)
 		if err != nil {
@@ -31,7 +31,7 @@ func (r *repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int
 	return flat, nil
 }
 
-func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error) {
+func (r *Repo) UpdateFlat(ctx context.Context, id int, status string) (*domain.Flat, error) {
 	query := `SELECT status FROM flat WHERE id = $1`
 
 	var currentStatus string
@@ -59,7 +59,7 @@ func (r *repo) UpdateFlat(ctx context.Context, id int, status string) (*domain.F
 	return res, nil
 }
 
-func (r *repo) updateLastDateHouse(ctx context.Context, id int) error {
+func (r *Repo) updateLastDateHouse(ctx context.Context, id int) error {
 	query := `UPDATE house SET updated_at = now() WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, query, id)
@@ -70,7 +70,7 @@ func (r *repo) updateLastDateHouse(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *repo) insertNewFlat(ctx context.Context, houseId int, price int, rooms int) (*domain.Flat, error) {
+func (r *Repo) insertNewFlat(ctx context.Context, houseId int, price int, rooms int) (*domain.Flat, error) {
 	query := `INSERT INTO flat (house_id, price, rooms) VALUES ($1, $2, $3) RETURNING *`
 
 	res := &domain.Flat{}

@@ -9,7 +9,7 @@ import (
 	"house-service/internal/config"
 )
 
-type repo struct {
+type Repo struct {
 	db *sqlx.DB
 }
 
@@ -26,6 +26,6 @@ func NewConnection(ctx context.Context, cfg config.DB) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func New(conn *sqlx.DB) *repo {
-	return &repo{db: conn}
+func New(conn *sqlx.DB) *Repo {
+	return &Repo{db: conn}
 }

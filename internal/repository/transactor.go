@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func (r *repo) transact(ctx context.Context, f func(ctx context.Context, tx *sqlx.Tx) error) error {
+func (r *Repo) transact(ctx context.Context, f func(ctx context.Context, tx *sqlx.Tx) error) error {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		return fmt.Errorf("failed to begin tx: %w", err)

@@ -6,7 +6,7 @@ import (
 	"house-service/internal/domain"
 )
 
-func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error) {
+func (r *Repo) CreateHouse(ctx context.Context, address string, year int, dev string) (*domain.House, error) {
 	query := `INSERT INTO house (address, year_built, developer) VALUES ($1, $2, $3) RETURNING *`
 
 	res := &domain.House{}
@@ -20,7 +20,7 @@ func (r *repo) CreateHouse(ctx context.Context, address string, year int, dev st
 	return res, nil
 }
 
-func (r *repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
+func (r *Repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
 	role := ctx.Value("role").(string)
 
 	var query string
