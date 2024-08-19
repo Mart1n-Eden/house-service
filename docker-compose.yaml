@@ -3,6 +3,7 @@ version: "3.8"
 services:
   postgres-service:
     image: postgres:latest
+    container_name: postgres_db
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -11,3 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - ./scripts/init.up.sql:/docker-entrypoint-initdb.d/init.up.sql
+
+  app:
+    build: ./
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-service
+    restart: on-failure
