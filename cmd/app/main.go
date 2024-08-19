@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -26,7 +27,10 @@ const (
 )
 
 func main() {
-	cfg := config.ParseConfig("config/config.yaml")
+	configPath := flag.String("config", "config/config.yaml", "config file path")
+	flag.Parse()
+
+	cfg := config.ParseConfig(*configPath)
 
 	logger.MustInit(cfg.Logger.Level)
 
@@ -83,3 +87,4 @@ func main() {
 		logger.Error("shutdown server error", slog.String("error", err.Error()))
 	}
 }
+g
