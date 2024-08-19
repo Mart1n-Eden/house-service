@@ -40,7 +40,7 @@ func (r *Repo) GetMessagesForSubscription(ctx context.Context) ([]domain.Message
 		}
 
 		var msg strings.Builder
-		msg.WriteString(fmt.Sprintf("New flats in house %d : ", id))
+		msg.WriteString(fmt.Sprintf("New flats in house %d :\n", id))
 
 		for i := range flats {
 			msg.WriteString(fmt.Sprintf("FlatId %d, Rooms %d, Price %d\n", flats[i].Id, flats[i].Rooms, flats[i].Price))
