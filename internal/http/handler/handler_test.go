@@ -12,16 +12,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"house-service/internal/logger"
 
 	"house-service/internal/domain"
 	"house-service/internal/http/handler/mocks"
 	"house-service/internal/http/handler/model/response"
-	"house-service/internal/logger"
 	"house-service/pkg/utils/dbErrors"
 )
 
 func TestCreateFlat(t *testing.T) {
-	log := logger.New("prod")
+	logger.MustInit("local")
 
 	t.Run("ValidRequest", func(t *testing.T) {
 		flatService := &mocks.FlatService{}
@@ -36,7 +36,6 @@ func TestCreateFlat(t *testing.T) {
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		body := []byte(`{"house_id":1,"price":1000,"rooms":3}`)
@@ -68,7 +67,6 @@ func TestCreateFlat(t *testing.T) {
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		req := httptest.NewRequest("POST", "/flat", strings.NewReader("invalid json"))
@@ -90,23 +88,25 @@ func TestCreateFlat(t *testing.T) {
 
 	t.Run("FlatServiceError", func(t *testing.T) {
 		flatService := &mocks.FlatService{}
-		flatService.On("CreateFlat", context.Background(), 1, 1000, 3).
+		flatService.On("CreateFlat", context.WithValue(context.Background(), "requestId", "123"), 1, 1000, 3).
 			Return(nil, errors.New(dbErrors.ErrFailedConnection))
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		body := []byte(`{"house_id":1,"price":1000,"rooms":3}`)
 		req := httptest.NewRequest("POST", "/flat", bytes.NewReader(body))
+		ctx := context.WithValue(req.Context(), "requestId", "123")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		h.CreateFlat(w, req)
 
 		expected := response.ErrorInternal{
-			Message: dbErrors.ErrFailedConnection,
-			Code:    http.StatusInternalServerError,
+			Message:   dbErrors.ErrFailedConnection,
+			RequestId: "123",
+			Code:      http.StatusInternalServerError,
 		}
 
 		var received response.ErrorInternal
@@ -124,7 +124,6 @@ func TestCreateFlat(t *testing.T) {
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		body := []byte(`{"house_id":1,"price":1000,"rooms":3}`)
@@ -147,7 +146,7 @@ func TestCreateFlat(t *testing.T) {
 }
 
 func TestGetHouse(t *testing.T) {
-	log := logger.New("prod")
+	logger.MustInit("local")
 
 	t.Run("ValidRequest", func(t *testing.T) {
 		flatService := &mocks.FlatService{}
@@ -164,7 +163,6 @@ func TestGetHouse(t *testing.T) {
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		req := httptest.NewRequest("GET", "/house/1", nil)
@@ -201,7 +199,6 @@ func TestGetHouse(t *testing.T) {
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		req := httptest.NewRequest("GET", "/house/1", nil)
@@ -223,15 +220,16 @@ func TestGetHouse(t *testing.T) {
 
 	t.Run("ErrorGettingHouse", func(t *testing.T) {
 		flatService := &mocks.FlatService{}
-		flatService.On("GetHouse", context.Background(), 1).
+		flatService.On("GetHouse", context.WithValue(context.Background(), "requestId", "123"), 1).
 			Return(nil, errors.New(dbErrors.ErrFailedConnection))
 
 		h := &Handler{
 			flatService: flatService,
-			log:         log,
 		}
 
 		req := httptest.NewRequest("GET", "/house/1", nil)
+		ctx := context.WithValue(req.Context(), "requestId", "123")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		h.GetHouse(w, req)
@@ -239,8 +237,9 @@ func TestGetHouse(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 
 		expectedError := response.ErrorInternal{
-			Message: "failed connection",
-			Code:    500,
+			Message:   "failed connection",
+			RequestId: "123",
+			Code:      500,
 		}
 
 		var received response.ErrorInternal

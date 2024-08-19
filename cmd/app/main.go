@@ -87,4 +87,3 @@ func main() {
 		logger.Error("shutdown server error", slog.String("error", err.Error()))
 	}
 }
-g

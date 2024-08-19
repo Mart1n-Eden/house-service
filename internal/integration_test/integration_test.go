@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/zhashkevych/go-sqlxmock"
+	"house-service/internal/sender"
+	"house-service/internal/service/subscribe"
 
 	"house-service/internal/cache"
 	"house-service/internal/domain"
@@ -27,7 +29,7 @@ import (
 )
 
 func TestGetHouse(t *testing.T) {
-	log := logger.New("prod")
+	logger.MustInit("local")
 
 	origin := []domain.Flat{
 		{
@@ -67,11 +69,13 @@ func TestGetHouse(t *testing.T) {
 		c := cache.New()
 
 		tok := token.New("")
+		send := sender.New()
 
 		houseService := house.New(repo)
 		flatService := flat.New(repo, c)
 		authService := auth.New(repo, tok)
-		hnd := handler.New(log, houseService, flatService, authService)
+		subService := subscribe.New(repo, send)
+		hnd := handler.New(houseService, flatService, authService, subService)
 
 		req, err := http.NewRequest("GET", "/house/1", nil)
 		if err != nil {
@@ -103,11 +107,13 @@ func TestGetHouse(t *testing.T) {
 		c := cache.New()
 
 		tok := token.New("")
+		send := sender.New()
 
 		houseService := house.New(repo)
 		flatService := flat.New(repo, c)
 		authService := auth.New(repo, tok)
-		hnd := handler.New(log, houseService, flatService, authService)
+		subService := subscribe.New(repo, send)
+		hnd := handler.New(houseService, flatService, authService, subService)
 
 		req, err := http.NewRequest("GET", "/house/1", nil)
 		if err != nil {
@@ -142,11 +148,13 @@ func TestGetHouse(t *testing.T) {
 		require.Nil(t, err)
 
 		tok := token.New("")
+		send := sender.New()
 
 		houseService := house.New(repo)
 		flatService := flat.New(repo, c)
 		authService := auth.New(repo, tok)
-		hnd := handler.New(log, houseService, flatService, authService)
+		subService := subscribe.New(repo, send)
+		hnd := handler.New(houseService, flatService, authService, subService)
 
 		req, err := http.NewRequest("GET", "/house/1", nil)
 		if err != nil {
@@ -175,7 +183,7 @@ func TestGetHouse(t *testing.T) {
 
 func TestCreateFlat(t *testing.T) {
 	t.Run("ValidFlat", func(t *testing.T) {
-		log := logger.New("prod")
+		logger.MustInit("local")
 
 		origin := domain.Flat{
 			Id:      1,
@@ -190,11 +198,13 @@ func TestCreateFlat(t *testing.T) {
 		c := cache.New()
 
 		tok := token.New("")
+		send := sender.New()
 
 		houseService := house.New(repo)
 		flatService := flat.New(repo, c)
 		authService := auth.New(repo, tok)
-		hnd := handler.New(log, houseService, flatService, authService)
+		subService := subscribe.New(repo, send)
+		hnd := handler.New(houseService, flatService, authService, subService)
 
 		body := []byte(`{"house_id":1,"price":1000,"rooms":3}`)
 		req, err := http.NewRequest("POST", "/flats", bytes.NewReader(body))
