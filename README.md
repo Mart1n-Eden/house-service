@@ -1,4 +1,5 @@
 [![build](https://github.com/Mart1n-Eden/house-service/actions/workflows/github-ci.yml/badge.svg)](https://github.com/Mart1n-Eden/house-service/actions/workflows/github-ci.yml)
+[![codecov](https://codecov.io/gh/Mart1n-Eden/house-service/graph/badge.svg?token=Z1SCN0B9HS)](https://codecov.io/gh/Mart1n-Eden/house-service)
 # Тестовое задание для отбора на Avito Backend Bootcamp
 ## house-service
 
@@ -25,7 +26,8 @@ make run
 1. Реализована пользовательская авторизация по методам /register и /login.
 2. Реализован асинхронный механизм уведомления пользователя о появлении новых квартир в доме по почте, метод /house/{id}/subscribe.
 3. Настроен CI через github actions:
-    1. в README.md корня вашего репозитория отображён бейдж со статусом билда.
+    1. в README.md корня репозитория отображён бейдж со статусом билда.
+    2. в README.md корня репозитория отображен бейдж с процентом покрытия кода тестами.
 4. Настроен логгер
 
 ## Дополнения к решению
