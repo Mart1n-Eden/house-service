@@ -6,7 +6,7 @@ server:
   iddle_timeout: 60s
   shutdown_timeout: 10s
 db:
-  host: "localhost"
+  host: "postgres_db"
   port: 5432
   username: "postgres"
   name: "service"
