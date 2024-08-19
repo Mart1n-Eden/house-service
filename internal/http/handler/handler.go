@@ -9,22 +9,24 @@ import (
 	"house-service/internal/http/handler/model/request"
 	"house-service/internal/http/handler/model/response"
 	"house-service/internal/http/handler/tools"
+	"house-service/internal/logger"
 	"house-service/pkg/utils/dbErrors"
 )
 
 func (h *Handler) CreateHouse(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "createHouse")
+	const op = "handlers.CreateHouse"
 
 	houseReq, err := tools.Decode[request.HouseCreateRequest](r)
 	if err != nil {
-		h.log.Error("decode request", slog.String("error", err.Error()))
+		slog.Info("decode request", slog.String("op", op), slog.String("error", err.Error()))
+		logger.Error("decode request", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
 	res, err := h.houseService.CreateHouse(r.Context(), houseReq.Address, houseReq.Year, *houseReq.Developer)
 	if err != nil {
-		h.log.Error("create house", slog.String("error", err.Error()))
+		logger.Error("create house", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -37,20 +39,20 @@ func (h *Handler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetHouse(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "getHouse")
+	const op = "handlers.GetHouse"
 
 	id, _ := strings.CutPrefix(r.URL.Path, "/house/")
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.log.Error("convert id", slog.String("error", err.Error()))
+		logger.Error("convert id", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 
 	res, err := h.flatService.GetHouse(r.Context(), idInt)
 	if err != nil {
-		h.log.Error("get house", slog.String("error", err.Error()))
+		logger.Error("get house", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -63,18 +65,18 @@ func (h *Handler) GetHouse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateFlat(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "createFlat")
+	const op = "handler.CreateFlat"
 
 	flatReq, err := tools.Decode[request.FlatCreateRequest](r)
 	if err != nil {
-		h.log.Error("decode request", slog.String("error", err.Error()))
+		logger.Error("decode request", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
 	res, err := h.flatService.CreateFlat(r.Context(), flatReq.HouseId, flatReq.Price, flatReq.Rooms)
 	if err != nil {
-		h.log.Error("create flat", slog.String("error", err.Error()))
+		logger.Error("create flat", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -87,18 +89,18 @@ func (h *Handler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateFlat(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "updateFlat")
+	const op = "handlers.UpdateFlat"
 
 	flatReq, err := tools.Decode[request.FlatUpdateRequest](r)
 	if err != nil {
-		h.log.Error("decode request", slog.String("error", err.Error()))
+		logger.Error("decode request", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
 	res, err := h.flatService.UpdateFlat(r.Context(), flatReq.Id, flatReq.Status)
 	if err != nil {
-		h.log.Error("update flat", slog.String("error", err.Error()))
+		logger.Error("update flat", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -111,18 +113,18 @@ func (h *Handler) UpdateFlat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "CreateUser")
+	const op = "handlers.Registration"
 
 	regReq, err := tools.Decode[request.RegistrationRequest](r)
 	if err != nil {
-		h.log.Error("decode request", slog.String("error", err.Error()))
+		logger.Error("decode request", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
 	userId, err := h.authService.CreateUser(r.Context(), regReq.Email, regReq.Password, regReq.UserType)
 	if err != nil {
-		h.log.Error("registration", slog.String("error", err.Error()))
+		logger.Error("registration", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -135,18 +137,18 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "login")
+	const op = "handlers.Login"
 
 	loginReq, err := tools.Decode[request.LoginRequest](r)
 	if err != nil {
-		h.log.Error("decode request", slog.String("error", err.Error()))
+		logger.Error("decode request", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
 	token, err := h.authService.Login(r.Context(), loginReq.Id, loginReq.Password)
 	if err != nil {
-		h.log.Error("login", slog.String("error", err.Error()))
+		logger.Error("login", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -159,24 +161,25 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
+	const op = "handlers.DummyLogin"
+
 	userType := r.FormValue("user_type")
 
 	if userType == "" {
-		h.log.Error("login", slog.String("error", "user type is empty"))
+		logger.Error("login", slog.String("op", op), slog.String("error", "user type is empty"))
 		tools.SendClientError(w, "user type is empty", http.StatusBadRequest)
 		return
 	}
 
-	// TODO: move to tools
 	if userType != "moderator" && userType != "client" {
-		h.log.Error("login", slog.String("error", "user type is invalid"))
+		logger.Error("login", slog.String("op", op), slog.String("error", "user type is invalid"))
 		tools.SendClientError(w, "user type is invalid", http.StatusBadRequest)
 		return
 	}
 
 	token, err := h.authService.DummyLogin(userType)
 	if err != nil {
-		h.log.Error("login", slog.String("error", err.Error()))
+		logger.Error("login", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, err.Error(), http.StatusBadRequest)
 	}
 
@@ -184,27 +187,28 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) NewSubscription(w http.ResponseWriter, r *http.Request) {
-	//h.log = h.log.With("method", "newSubscription")
+	const op = "handlers.NewSubscription"
+
 	id, _ := strings.CutPrefix(r.URL.Path, "/house/")
 	id, _ = strings.CutSuffix(id, "/subscribe")
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.log.Error("convert id", slog.String("error", err.Error()))
+		logger.Error("login", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 
 	subReq, err := tools.Decode[request.SubscriptionRequest](r)
 	if err != nil {
-		h.log.Error("decode request", slog.String("error", err.Error()))
+		logger.Error("decode request", slog.String("op", op), slog.String("error", err.Error()))
 		tools.SendClientError(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
 	err = h.subscribeService.NewSubscription(r.Context(), subReq.Email, idInt)
 	if err != nil {
-		h.log.Error("create subscription", slog.String("error", err.Error()))
+		logger.Error("login", slog.String("op", op), slog.String("error", err.Error()))
 		if err.Error() == dbErrors.ErrFailedConnection {
 			tools.SendInternalError(w, err.Error(), http.StatusInternalServerError)
 			return

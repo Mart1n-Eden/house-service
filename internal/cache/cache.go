@@ -25,7 +25,6 @@ func New() *Cache {
 func (c *Cache) PutHouse(id string, house []domain.Flat) error {
 	err := c.pool.Add(id, house, defaultExpiration)
 	if err != nil {
-		// TODO: ?
 		return err
 	}
 

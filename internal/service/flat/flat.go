@@ -3,10 +3,12 @@ package flat
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"house-service/internal/domain"
+	"house-service/internal/logger"
 	"house-service/pkg/utils/dbErrors"
 )
 
@@ -75,7 +77,10 @@ func (s *Service) GetHouse(ctx context.Context, id int) (house []domain.Flat, er
 		return nil, err
 	}
 
-	_ = s.cache.PutHouse(idStr, house)
+	err = s.cache.PutHouse(idStr, house)
+	if err != nil {
+		logger.Warn("cache error", slog.String("op", "flatService.GetHouse"), slog.String("error", err.Error()))
+	}
 
 	return house, nil
 }

@@ -26,14 +26,13 @@ const (
 )
 
 func main() {
-
 	cfg := config.ParseConfig("config/config.yaml")
 
-	log := logger.New(cfg.Logger.Level)
+	logger.MustInit(cfg.Logger.Level)
 
 	pg, err := repository.NewConnection(context.Background(), cfg.DB)
 	if err != nil {
-		log.Error("error connecting to database", slog.String("error", err.Error()))
+		logger.Error("error connecting to database", slog.String("error", err.Error()))
 
 		os.Exit(1)
 	}
@@ -59,28 +58,28 @@ func main() {
 		}
 	}()
 
-	hnd := handler.New(log, houseService, flatService, authService, subService)
+	hnd := handler.New(houseService, flatService, authService, subService)
 
 	app := server.New(hnd.Route(), cfg.Server)
 
 	go func() {
-		if err := app.Run(); err != nil {
-			log.Error("error running server", slog.String("error", err.Error()))
+		if err = app.Run(); err != nil {
+			logger.Error("error running server", slog.String("error", err.Error()))
 		}
 	}()
 
-	log.Info("starting server", slog.String("address", cfg.Server.Address))
+	logger.Info("starting server", slog.String("address", cfg.Server.Address))
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, os.Interrupt)
 	<-quit
 
-	log.Info("stopping server")
+	logger.Info("stopping server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	if err := app.Shutdown(ctx); err != nil {
-		log.Error("shutdown server error", slog.String("error", err.Error()))
+	if err = app.Shutdown(ctx); err != nil {
+		logger.Error("shutdown server error", slog.String("error", err.Error()))
 	}
 }

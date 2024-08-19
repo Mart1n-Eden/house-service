@@ -3,6 +3,7 @@ package logger
 import (
 	"log/slog"
 	"os"
+	"sync"
 )
 
 const (
@@ -11,49 +12,59 @@ const (
 	lvlProd  = "prod"
 )
 
-//type LoggerWrapper struct{ *slog.Logger }
-//
-//func (l *LoggerWrapper) Info(msg string, fields ...slog.Attr) {
-//	l.Logger.Info(msg, fields...)
-//}
-//
-//func (l *LoggerWrapper) Debug(msg string, fields ...slog.Attr) {
-//	l.Logger.Debug(msg, fields...)
-//}
-//
-//func (l *LoggerWrapper) Error(msg string, fields ...slog.Attr) {
-//	l.Logger.Error(msg, fields...)
-//}
-//
-//func (l *LoggerWrapper) Warn(msg string, fields ...slog.Attr) {
-//	l.Logger.Warn(msg, fields...)
-//}
-//
-//func (l *LoggerWrapper) Fatal(msg string, fields ...slog.Attr) {
-//	l.Logger.Fatal(msg, fields...)
-//}
-//
-//var log *slog.Logger
-
-func New(env string) *slog.Logger {
-	var log *slog.Logger
-
-	switch env {
-	case lvlLocal:
-		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	case lvlDev:
-		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	case lvlProd:
-		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	}
-
-	return log
+type LogWrapper struct {
+	logger *slog.Logger
+	sync.Once
 }
 
-//func MustInit() {
-//	log = New(os.Getenv("LOG_LEVEL"))
-//}
+var log *LogWrapper
 
-/*
-Допилить до паттерна синглтон
-*/
+func MustInit(level string) {
+	log = &LogWrapper{}
+	log.Do(func() {
+		switch level {
+		case lvlLocal:
+			log.logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		case lvlDev:
+			log.logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		case lvlProd:
+			log.logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+		}
+	})
+}
+
+func Info(msg string, fields ...slog.Attr) {
+	var args []any
+	for i := range fields {
+		args = append(args, slog.Attr{Key: fields[i].Key, Value: slog.StringValue(fields[i].Value.String())})
+	}
+	l := log.logger.With(args...)
+	l.Info(msg)
+}
+
+func Debug(msg string, fields ...slog.Attr) {
+	var args []any
+	for i := range fields {
+		args = append(args, slog.Attr{Key: fields[i].Key, Value: slog.StringValue(fields[i].Value.String())})
+	}
+	l := log.logger.With(args...)
+	l.Debug(msg)
+}
+
+func Error(msg string, fields ...slog.Attr) {
+	var args []any
+	for i := range fields {
+		args = append(args, slog.Attr{Key: fields[i].Key, Value: slog.StringValue(fields[i].Value.String())})
+	}
+	l := log.logger.With(args...)
+	l.Error(msg)
+}
+
+func Warn(msg string, fields ...slog.Attr) {
+	var args []any
+	for i := range fields {
+		args = append(args, slog.Attr{Key: fields[i].Key, Value: slog.StringValue(fields[i].Value.String())})
+	}
+	l := log.logger.With(args...)
+	l.Warn(msg)
+}

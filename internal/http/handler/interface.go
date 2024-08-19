@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"log/slog"
 
 	"house-service/internal/domain"
 )
@@ -29,16 +28,14 @@ type SubscribeService interface {
 }
 
 type Handler struct {
-	log              *slog.Logger
 	houseService     HouseService
 	flatService      FlatService
 	authService      AuthService
 	subscribeService SubscribeService
 }
 
-func New(log *slog.Logger, house HouseService, flat FlatService, auth AuthService, subscribe SubscribeService) *Handler {
+func New(house HouseService, flat FlatService, auth AuthService, subscribe SubscribeService) *Handler {
 	return &Handler{
-		log:              log,
 		houseService:     house,
 		flatService:      flat,
 		authService:      auth,
