@@ -31,11 +31,11 @@ func SendClientError(w http.ResponseWriter, msg string, code int) {
 	json.NewEncoder(w).Encode(err)
 }
 
-func SendInternalError(w http.ResponseWriter, msg string, code int) {
+func SendInternalError(w http.ResponseWriter, msg string, requestId string, code int) {
 	e := response.ErrorInternal{
-		Message: msg,
-		// TODO: RequestId
-		Code: code,
+		Message:   msg,
+		RequestId: requestId,
+		Code:      code,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

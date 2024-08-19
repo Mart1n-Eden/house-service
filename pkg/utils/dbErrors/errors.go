@@ -21,7 +21,7 @@ func PrepareError(err error) error {
 		case sql.ErrNoRows:
 			return errors.New(ErrNotFound)
 		default:
-			return err
+			return errors.New(ErrFailedConnection)
 		}
 	}
 

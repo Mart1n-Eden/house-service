@@ -40,9 +40,9 @@ type ErrorClient struct {
 }
 
 type ErrorInternal struct {
-	Message string `json:"message"`
-	//RequestId string `json:"request_id"`
-	Code int `json:"code"`
+	Message   string `json:"message"`
+	RequestId string `json:"request_id"`
+	Code      int    `json:"code"`
 }
 
 func CreateFlatResponse(f *domain.Flat) Flat {

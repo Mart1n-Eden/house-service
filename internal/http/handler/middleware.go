@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/google/uuid"
 	"house-service/internal/http/handler/tools"
 )
 
@@ -39,6 +40,7 @@ func (h *Handler) jwtMiddleware(next http.Handler, role []string) http.Handler {
 
 		ctx := context.WithValue(r.Context(), "role", userRole)
 		ctx = context.WithValue(ctx, "id", id)
+		ctx = context.WithValue(ctx, "requestId", uuid.New().String())
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
