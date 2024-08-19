@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"house-service/internal/domain"
 	tools "house-service/pkg/utils/dbErrors"
@@ -36,7 +35,6 @@ func (r *Repo) GetHouse(ctx context.Context, id int) ([]domain.Flat, error) {
 
 	rows, err := r.db.QueryContext(ctx, query, id)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, tools.PrepareError(err)
 	}
 

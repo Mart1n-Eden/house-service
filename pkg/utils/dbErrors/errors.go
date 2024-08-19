@@ -20,14 +20,16 @@ func PrepareError(err error) error {
 		switch err {
 		case sql.ErrNoRows:
 			return errors.New(ErrNotFound)
-		default:
+		case sql.ErrConnDone:
 			return errors.New(ErrFailedConnection)
+		default:
+			return errors.New(ErrNotFound)
 		}
 	}
 
 	switch pErr.Code {
 	case "23503":
-		return errors.New(ErrAlreadyExists)
+		return errors.New(ErrNotFound)
 	case "23505":
 		return errors.New(ErrUniqAlreadyExist)
 	case "08006":

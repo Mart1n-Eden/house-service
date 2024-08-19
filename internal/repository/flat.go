@@ -25,7 +25,7 @@ func (r *Repo) CreateFlat(ctx context.Context, houseId int, price int, rooms int
 	})
 
 	if err != nil {
-		return nil, tools.PrepareError(err)
+		return nil, err
 	}
 
 	return flat, nil

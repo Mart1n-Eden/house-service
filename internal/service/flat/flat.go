@@ -77,9 +77,11 @@ func (s *Service) GetHouse(ctx context.Context, id int) (house []domain.Flat, er
 		return nil, err
 	}
 
-	err = s.cache.PutHouse(idStr, house)
-	if err != nil {
-		logger.Warn("cache error", slog.String("op", "flatService.GetHouse"), slog.String("error", err.Error()))
+	if len(house) != 0 {
+		err = s.cache.PutHouse(idStr, house)
+		if err != nil {
+			logger.Warn("cache error", slog.String("op", "flatService.GetHouse"), slog.String("error", err.Error()))
+		}
 	}
 
 	return house, nil
