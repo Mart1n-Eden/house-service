@@ -22,7 +22,7 @@ jobs:
       run: go mod tidy
 
     - name: Build
-      run: go build ./cmp/app/main.go
+      run: go build ./cmd/app/main.go
 
     - name: Test
       run: go test -coverprofile=coverage.txt ./...
